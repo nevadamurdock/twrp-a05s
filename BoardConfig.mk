@@ -111,3 +111,9 @@ TARGET_RECOVERY_UPDATER_LIBS :=
 # Force Generate recovery.img Target
 TARGET_NO_RECOVERY := false
 BOARD_USES_RECOVERY_AS_BOOT := false
+
+# Force Recovery Image Generation Flags (Fix recovery.img Missing)
+TARGET_NO_RECOVERY := false
+BOARD_USES_RECOVERY_AS_BOOT := false
+BOARD_RECOVERYIMAGE_PARTITION_SIZE := 100663296
+BOARD_HAS_LARGE_FILESYSTEM := true
