@@ -120,3 +120,6 @@ BOARD_HAS_LARGE_FILESYSTEM := true
 
 # Fix Symlink Conflict for vendor directory
 BOARD_RECOVERY_RAMDISK_SYMLINKS := false
+
+# Fix Symlink Conflict for vendor directory
+BOARD_RECOVERY_RAMDISK_SYMLINKS := false
