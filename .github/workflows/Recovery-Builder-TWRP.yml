@@ -86,11 +86,18 @@ jobs:
       - name: Package for Samsung Odin (Make .tar)
         run: |
           cd workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
+          echo "=== List File Output di Directory Product ==="
+          ls -la
+          
           if [ -f "recovery.img" ]; then
             tar -cvf recovery.tar recovery.img
-            echo "SUCCESS_BUILD=true" >> $GITHUB_ENV
+          elif [ -f "boot.img" ]; then
+            cp boot.img recovery.img
+            tar -cvf recovery.tar recovery.img
+          elif [ -f "vendor_boot.img" ]; then
+            tar -cvf recovery.tar vendor_boot.img
           else
-            echo "Build failed, recovery.img not found!"
+            echo "File image tidak ditemukan!"
             exit 1
           fi
 
@@ -99,5 +106,5 @@ jobs:
         with:
           name: TWRP_Recovery_${{ github.event.inputs.DEVICE_NAME }}
           path: |
-            workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/recovery.img
-            workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/recovery.tar
+            workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.img
+            workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.tar
