@@ -8,8 +8,8 @@ LOCAL_PATH := device/samsung/a05s
 # Enable APEX updates
 $(call inherit-product, $(SRC_TARGET_DIR)/product/updatable_apex.mk)
 
-# Shipping API level & Dynamic Partitions
-PRODUCT_SHIPPING_API_LEVEL := 33
+# Shipping API level & Dynamic Partitions (TWRP 12.1 uses API 32)
+PRODUCT_SHIPPING_API_LEVEL := 32
 PRODUCT_USE_DYNAMIC_PARTITIONS := true
 
 # Fastbootd & Health HAL

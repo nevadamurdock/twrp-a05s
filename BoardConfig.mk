@@ -26,6 +26,7 @@ TARGET_2ND_CPU_VARIANT_RUNTIME := kryo300
 TARGET_BOOTLOADER_BOARD_NAME := bengal
 TARGET_BOARD_PLATFORM := bengal
 BOARD_HAS_NO_SELECT_BUTTON := true
+BOARD_SYSTEMSDK_VERSIONS := 32
 
 # Kernel Configuration
 BOARD_BOOTIMG_HEADER_VERSION := 2
@@ -69,7 +70,7 @@ TW_SCREEN_BLANK_ON_BOOT := true
 TW_EXCLUDE_SUPERSU := true
 TW_EXCLUDE_TWRP_APP := true
 
-# Automatic Vendor & DLKM Touchscreen Module Loading (Fix Kinguser981)
+# Automatic Vendor & DLKM Touchscreen Module Loading
 TW_LOAD_VENDOR_MODULES := "tp_info.ko lct_tp.ko cmd.ko ilitek.ko icnl9922c.ko hx83112f.ko goodix_ts.ko atmel_mxt_ts.ko synaptics_tcm_ts.ko nt36xxx-i2c.ko pt_ts.ko pt_i2c.ko pt_device_access.ko raydium_ts.ko sdhci-msm-sec.ko"
 TW_LOAD_VENDOR_DLKM_MODULES := "tp_info.ko lct_tp.ko cmd.ko ilitek.ko icnl9922c.ko hx83112f.ko goodix_ts.ko atmel_mxt_ts.ko synaptics_tcm_ts.ko nt36xxx-i2c.ko pt_ts.ko pt_i2c.ko pt_device_access.ko raydium_ts.ko sdhci-msm-sec.ko"
 
