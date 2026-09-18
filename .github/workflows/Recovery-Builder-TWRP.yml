@@ -1,0 +1,103 @@
+name: Recovery Builder - TWRP (Samsung A05s)
+
+on:
+  workflow_dispatch:
+    inputs:
+      MANIFEST_URL:
+        description: 'TWRP Manifest URL'
+        required: true
+        default: 'https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp'
+      MANIFEST_BRANCH:
+        description: 'TWRP Manifest Branch'
+        required: true
+        default: 'twrp-12.1'
+      DEVICE_TREE_URL:
+        description: 'Device Tree URL'
+        required: true
+        default: 'https://github.com/nevadamurdock/twrp-a05s'
+      DEVICE_TREE_BRANCH:
+        description: 'Device Tree Branch'
+        required: true
+        default: 'main'
+      DEVICE_PATH:
+        description: 'Device Path'
+        required: true
+        default: 'device/samsung/a05s'
+      DEVICE_NAME:
+        description: 'Device Codename'
+        required: true
+        default: 'a05s'
+      MAKEFILE_NAME:
+        description: 'Target Makefile Name'
+        required: true
+        default: 'twrp_a05s'
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Clean Up Disk Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+
+      - name: Initialize Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git-core gnupg flex bison build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip python3 tar
+
+      - name: Install Repo Tool
+        run: |
+          mkdir -p ~/bin
+          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+          chmod a+x ~/bin/repo
+          echo "$HOME/bin" >> $GITHUB_PATH
+
+      - name: Initialize TWRP Source
+        run: |
+          mkdir -p workspace
+          cd workspace
+          git config --global user.name "nevadamurdock"
+          git config --global user.email "nevadamurdock@github.com"
+          repo init -u ${{ github.event.inputs.MANIFEST_URL }} -b ${{ github.event.inputs.MANIFEST_BRANCH }} --depth=1
+
+      - name: Sync Source Code
+        run: |
+          cd workspace
+          repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune -j$(nproc --all)
+
+      - name: Clone Device Tree
+        run: |
+          cd workspace
+          git clone ${{ github.event.inputs.DEVICE_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ${{ github.event.inputs.DEVICE_PATH }}
+
+      - name: Building Recovery
+        run: |
+          cd workspace
+          export ALLOW_MISSING_DEPENDENCIES=true
+          source build/envsetup.sh
+          lunch ${{ github.event.inputs.MAKEFILE_NAME }}-userdebug || lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng
+          make recoveryimage -j$(nproc --all)
+
+      - name: Package for Samsung Odin (Make .tar)
+        run: |
+          cd workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
+          if [ -f "recovery.img" ]; then
+            tar -cvf recovery.tar recovery.img
+            echo "SUCCESS_BUILD=true" >> $GITHUB_ENV
+          else
+            echo "Build failed, recovery.img not found!"
+            exit 1
+          fi
+
+      - name: Upload Recovery Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: TWRP_Recovery_${{ github.event.inputs.DEVICE_NAME }}
+          path: |
+            workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/recovery.img
+            workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/recovery.tar
