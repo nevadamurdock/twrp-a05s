@@ -74,12 +74,10 @@ jobs:
           cd workspace
           repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune -j$(nproc --all)
 
-      - name: Clone Device Tree
+      - name: Clone Device Tree & Clean Symlink Conflicts
         run: |
           cd workspace
           git clone ${{ github.event.inputs.DEVICE_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ${{ github.event.inputs.DEVICE_PATH }}
-          
-          # Fix symlink conflict: Remove vendor folder inside recovery/root if exists
           rm -rf ${{ github.event.inputs.DEVICE_PATH }}/recovery/root/vendor
 
       - name: Building Recovery Target

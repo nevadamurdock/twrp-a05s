@@ -123,3 +123,6 @@ BOARD_RECOVERY_RAMDISK_SYMLINKS := false
 
 # Fix Symlink Conflict for vendor directory
 BOARD_RECOVERY_RAMDISK_SYMLINKS := false
+
+# Prevent physical vendor directory creation in recovery ramdisk
+TARGET_COPY_OUT_VENDOR := vendor
