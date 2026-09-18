@@ -66,6 +66,12 @@ TW_INCLUDE_RESETPROP := true
 TW_INCLUDE_LIBRESETPROP := true
 TW_ALLOW_EXFAT := true
 TW_SCREEN_BLANK_ON_BOOT := true
+TW_EXCLUDE_SUPERSU := true
+TW_EXCLUDE_TWRP_APP := true
+
+# Automatic Vendor & DLKM Touchscreen Module Loading (Fix Kinguser981)
+TW_LOAD_VENDOR_MODULES := "tp_info.ko lct_tp.ko cmd.ko ilitek.ko icnl9922c.ko hx83112f.ko goodix_ts.ko atmel_mxt_ts.ko synaptics_tcm_ts.ko nt36xxx-i2c.ko pt_ts.ko pt_i2c.ko pt_device_access.ko raydium_ts.ko sdhci-msm-sec.ko"
+TW_LOAD_VENDOR_DLKM_MODULES := "tp_info.ko lct_tp.ko cmd.ko ilitek.ko icnl9922c.ko hx83112f.ko goodix_ts.ko atmel_mxt_ts.ko synaptics_tcm_ts.ko nt36xxx-i2c.ko pt_ts.ko pt_i2c.ko pt_device_access.ko raydium_ts.ko sdhci-msm-sec.ko"
 
 # OrangeFox Recovery (OFRP) Flags
 OF_KEEP_DM_VERITY_FORCED_ENCRYPTION := 1
