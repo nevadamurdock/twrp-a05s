@@ -1,7 +1,5 @@
 #
-# Copyright (C) 2025 The Android Open Source Project
-# Copyright (C) 2025 SebaUbuntu's TWRP device tree generator
-#
+# Copyright (C) 2026 The Android Open Source Project
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -9,25 +7,19 @@
 $(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 
-# Inherit some common twrp stuff.
-$(call inherit-product-if-exists, vendor/twrp/config/common.mk)
+# Inherit TWRP common configuration
+$(call inherit-product, vendor/twrp/config/common.mk)
 
-# Inherit some common pbrp stuff.
-$(call inherit-product-if-exists, vendor/pb/config/common.mk)
-
-# Enable project quotas and casefolding for emulated storage without sdcardfs
-$(call inherit-product, $(SRC_TARGET_DIR)/product/emulated_storage.mk)
-
-# Inherit from a05s device
+# Inherit device configuration
 $(call inherit-product, device/samsung/a05s/device.mk)
 
+# Inherit Touch Driver Board configuration (FIX TOUCHSCREEN)
+$(call inherit-product, device/samsung/a05s/touch_driver_board.mk)
+
+# Device identifier
 PRODUCT_DEVICE := a05s
 PRODUCT_NAME := twrp_a05s
 PRODUCT_BRAND := samsung
 PRODUCT_MODEL := SM-A057F
 PRODUCT_MANUFACTURER := samsung
-
 PRODUCT_GMS_CLIENTID_BASE := android-samsung-ss
-
-# Apply JDM haptics patch before building recovery
-$(shell $(LOCAL_PATH)/apply_jdm_haptics_patch.sh >/dev/null 2>&1)

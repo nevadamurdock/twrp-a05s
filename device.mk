@@ -1,53 +1,34 @@
 #
-# Copyright (C) 2025 The Android Open Source Project
-# Copyright (C) 2025 SebaUbuntu's TWRP device tree generator
-#
+# Copyright (C) 2026 The Android Open Source Project
 # SPDX-License-Identifier: Apache-2.0
 #
 
 LOCAL_PATH := device/samsung/a05s
 
-# API levels
-PRODUCT_SHIPPING_API_LEVEL := 30
+# Enable APEX updates
+$(call inherit-product, $(SRC_TARGET_DIR)/product/updatable_apex.mk)
 
-# Dynamic
+# Shipping API level & Dynamic Partitions
+PRODUCT_SHIPPING_API_LEVEL := 33
 PRODUCT_USE_DYNAMIC_PARTITIONS := true
 
-# fastbootd
+# Fastbootd & Health HAL
 PRODUCT_PACKAGES += \
-    android.hardware.fastboot@1.0-impl-mock \
-    fastbootd 
-
-# Recovery modules/dependencies
-TARGET_RECOVERY_DEVICE_MODULES += \
-    libandroidicu 
-
-RECOVERY_LIBRARY_SOURCE_FILES += \
-    $(TARGET_OUT_SHARED_LIBRARIES)/libandroidicu.so 
-
-PRODUCT_PACKAGES += \
-    otapreopt_script \
-    update_engine \
-    update_engine_sideload \
-    update_verifier \
-
-# Health
-PRODUCT_PACKAGES += \
+    android.hardware.fastboot@1.1-impl-mock \
+    fastbootd \
     android.hardware.health@2.1-impl \
-    android.hardware.health@2.1-impl.recovery \
-    android.hardware.health@2.1-service
+    android.hardware.health@2.1-service \
+    android.hardware.boot@1.1-impl \
+    android.hardware.gatekeeper@1.0-service
 
-# QCOM
+# Recovery Additional Binary & Libraries
+TARGET_RECOVERY_DEVICE_MODULES += \
+    libion \
+    libxml2 \
+    libkeymaster4 \
+    libpuresoftkeymasterdevice
+
+# Qualcomm Decryption Support
 PRODUCT_PACKAGES += \
     qcom_decrypt \
     qcom_decrypt_fbe
-
-# Soong namespaces
-PRODUCT_SOONG_NAMESPACES += \
-    $(LOCAL_PATH)
-
-# VNDK
-PRODUCT_TARGET_VNDK_VERSION := 30
-
-# Enable Fuse Passthrough
-PRODUCT_PROPERTY_OVERRIDES += persist.sys.fuse.passthrough.enable=true
