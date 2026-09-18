@@ -1,9 +1,10 @@
 <!--
     Input:
         compatibility_matrix.xml
+        device_compatibility_matrix.xml
         vendor.samsung.frameworks.codecsolution-matrix.xml
 -->
-<compatibility-matrix version="4.0" type="device">
+<compatibility-matrix version="5.0" type="device">
     <hal format="hidl" optional="false">
         <name>android.frameworks.sensorservice</name>
         <version>1.0</version>
@@ -73,6 +74,14 @@
         <name>vendor.samsung.frameworks.codecsolution</name>
         <interface>
             <name>ISehCodecSolution</name>
+            <instance>default</instance>
+        </interface>
+    </hal>
+    <hal format="hidl" optional="true">
+        <name>vendor.samsung.frameworks.security.dsms</name>
+        <version>1.0</version>
+        <interface>
+            <name>ISehDsms</name>
             <instance>default</instance>
         </interface>
     </hal>
