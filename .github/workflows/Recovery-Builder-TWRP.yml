@@ -52,7 +52,7 @@ jobs:
       - name: Initialize Environment
         run: |
           sudo apt-get update
-          sudo apt-get install -y git-core gnupg flex bison build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip python3 tar
+          sudo apt-get install -y git-core gnupg flex bison build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip python3 tar rsync
 
       - name: Install Repo Tool
         run: |
@@ -78,6 +78,9 @@ jobs:
         run: |
           cd workspace
           git clone ${{ github.event.inputs.DEVICE_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ${{ github.event.inputs.DEVICE_PATH }}
+          
+          # Fix symlink conflict: Remove vendor folder inside recovery/root if exists
+          rm -rf ${{ github.event.inputs.DEVICE_PATH }}/recovery/root/vendor
 
       - name: Building Recovery Target
         run: |
@@ -91,33 +94,14 @@ jobs:
         run: |
           cd workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
           
-          # Cek 1: Jika recovery.img sudah dibuat otomatis oleh AOSP
           if [ -f "recovery.img" ]; then
             echo "Found compiled recovery.img!"
             tar -cvf recovery.tar recovery.img
-          # Cek 2: Jika baru dibuat folder ramdisk recovery, kemas manual menggunakan mkbootimg
-          elif [ -d "recovery/root" ]; then
-            echo "recovery.img missing, packing ramdisk manually..."
-            mkdir -p ramdisk_tmp
-            cd recovery/root && find . | cpio -o -H newc | gzip -9 > ../../ramdisk_tmp/ramdisk-recovery.img
-            cd ../..
-            
-            # Panggil binary mkbootimg dari build tree
-            ../../../out/host/linux-x86/bin/mkbootimg \
-              --kernel ../../../device/samsung/a05s/prebuilt/kernel \
-              --ramdisk ramdisk_tmp/ramdisk-recovery.img \
-              --cmdline "video=vfb:640x400,bpp=32,memsize=3072000 firmware_class.path=/vendor/firmware,/vendor/firmware_mnt/image console=ttyMSM0,115200n8 androidboot.hardware=qcom service_notifier.ready=1 androidboot.memcg=1" \
-              --base 0x00000000 \
-              --pagesize 4096 \
-              --ramdisk_offset 0x02000000 \
-              --tags_offset 0x01e00000 \
-              --header_version 2 \
-              --dtb ../../../device/samsung/a05s/prebuilt/dtb.img \
-              -o recovery.img
-
+          elif [ -f "boot.img" ]; then
+            cp boot.img recovery.img
             tar -cvf recovery.tar recovery.img
           else
-            echo "Build failed, recovery directory and recovery.img not found!"
+            echo "Build failed, recovery.img not found!"
             exit 1
           fi
 
