@@ -101,3 +101,9 @@ SHRP_MAINTAINER := SavedByLight_ravindu644
 OF_MAINTAINER := SavedByLight_ravindu644
 MAINTAINER := SavedByLight_ravindu644
 BETA_BUILD := true
+
+# Force Building Recovery Image & Ramdisk Packaging
+BOARD_USES_RECOVERY_AS_BOOT := false
+TARGET_NO_KERNEL := false
+BOARD_HAS_LARGE_FILESYSTEM := true
+TARGET_RECOVERY_UPDATER_LIBS :=

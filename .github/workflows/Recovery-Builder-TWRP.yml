@@ -75,29 +75,49 @@ jobs:
           cd workspace
           git clone ${{ github.event.inputs.DEVICE_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ${{ github.event.inputs.DEVICE_PATH }}
 
-      - name: Building Recovery
+      - name: Building Recovery Target
         run: |
           cd workspace
           export ALLOW_MISSING_DEPENDENCIES=true
           source build/envsetup.sh
           lunch ${{ github.event.inputs.MAKEFILE_NAME }}-userdebug || lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng
-          make recoveryimage -j$(nproc --all)
+          make recoveryimage bootimage -j$(nproc --all) || make recoveryimage -j$(nproc --all)
 
       - name: Package for Samsung Odin (Make .tar)
         run: |
           cd workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
-          echo "=== List File Output di Directory Product ==="
+          echo "=== Checking Output Directory ==="
           ls -la
           
+          # Jika recovery.img belum dikemas otomatis oleh build system, kemas ramdisk recovery secara manual
+          if [ ! -f "recovery.img" ] && [ -d "recovery/root" ]; then
+            echo "Creating recovery.img from compiled ramdisk..."
+            mkdir -p ramdisk_tmp
+            cd recovery/root && find . | cpio -o -H newc | gzip -9 > ../../ramdisk_tmp/ramdisk-recovery.img
+            cd ../..
+            
+            if [ -f "boot.img" ]; then
+              cp boot.img recovery.img
+            elif [ -f "../../../host/linux-x86/bin/mkbootimg" ]; then
+              ../../../host/linux-x86/bin/mkbootimg \
+                --kernel ../../../device/samsung/a05s/prebuilt/kernel \
+                --ramdisk ramdisk_tmp/ramdisk-recovery.img \
+                --cmdline "video=vfb:640x400,bpp=32,memsize=3072000 firmware_class.path=/vendor/firmware,/vendor/firmware_mnt/image console=ttyMSM0,115200n8 androidboot.hardware=qcom service_notifier.ready=1 androidboot.memcg=1" \
+                --base 0x00000000 \
+                --pagesize 4096 \
+                --ramdisk_offset 0x02000000 \
+                --tags_offset 0x01e00000 \
+                --header_version 2 \
+                --dtb ../../../device/samsung/a05s/prebuilt/dtb.img \
+                -o recovery.img
+            fi
+          fi
+
           if [ -f "recovery.img" ]; then
             tar -cvf recovery.tar recovery.img
-          elif [ -f "boot.img" ]; then
-            cp boot.img recovery.img
-            tar -cvf recovery.tar recovery.img
-          elif [ -f "vendor_boot.img" ]; then
-            tar -cvf recovery.tar vendor_boot.img
+            echo "SUCCESS=true" >> $GITHUB_ENV
           else
-            echo "File image tidak ditemukan!"
+            echo "Failed to generate recovery.img"
             exit 1
           fi
 
@@ -106,5 +126,5 @@ jobs:
         with:
           name: TWRP_Recovery_${{ github.event.inputs.DEVICE_NAME }}
           path: |
-            workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.img
-            workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.tar
+            workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/recovery.img
+            workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/recovery.tar
